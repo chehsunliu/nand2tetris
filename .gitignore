@@ -1,3 +1,7 @@
+*.out
+*.dat
+*.zip
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,vim,jetbrains
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,vim,jetbrains
 
