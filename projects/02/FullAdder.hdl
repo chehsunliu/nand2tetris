@@ -5,6 +5,29 @@
 
 /**
  * Computes the sum of three bits.
+ *
+ * c a b | s
+ * ------+--
+ * 0 0 0 | 0
+ * 0 0 1 | 1
+ * 0 1 0 | 1
+ * 0 1 1 | 0
+ * 1 0 0 | 1
+ * 1 0 1 | 0
+ * 1 1 0 | 0
+ * 1 1 1 | 1
+ *
+ * c a b | c
+ * ------+--
+ * 0 0 0 | 0
+ * 0 0 1 | 0
+ * 0 1 0 | 0
+ * 0 1 1 | 1
+ * 1 0 0 | 0
+ * 1 0 1 | 1
+ * 1 1 0 | 1
+ * 1 1 1 | 1
+ *
  */
 
 CHIP FullAdder {
@@ -12,6 +35,12 @@ CHIP FullAdder {
     OUT sum,     // Right bit of a + b + c
         carry;   // Left bit of a + b + c
 
-    PARTS:
-    // Put you code here:
+PARTS:
+    HalfAdder(a=a, b=b, sum=sum0, carry=tmp0);
+    Xor(a=sum0, b=c, out=sum);
+
+    And(a=c, b=a, out=tmp1);
+    And(a=c, b=b, out=tmp2);
+    Or(a=tmp0, b=tmp1, out=out0);
+    Or(a=out0, b=tmp2, out=carry);
 }

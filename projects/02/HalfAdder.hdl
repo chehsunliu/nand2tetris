@@ -5,6 +5,21 @@
 
 /**
  * Computes the sum of two bits.
+ *
+ * a b | s
+ * ----+--
+ * 0 0 | 0
+ * 0 1 | 1
+ * 1 0 | 1
+ * 1 1 | 0
+ *
+ * a b | c
+ * ----+--
+ * 0 0 | 0
+ * 0 1 | 0
+ * 1 0 | 0
+ * 1 1 | 1
+ *
  */
 
 CHIP HalfAdder {
@@ -12,6 +27,7 @@ CHIP HalfAdder {
     OUT sum,    // Right bit of a + b 
         carry;  // Left bit of a + b
 
-    PARTS:
-    // Put you code here:
+PARTS:
+    Xor(a=a, b=b, out=sum);
+    And(a=a, b=b, out=carry);
 }
