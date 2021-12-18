@@ -38,6 +38,45 @@ CHIP CPU {
         addressM[15],    // Address in data memory (of M)
         pc[15];          // address of next instruction
 
-    PARTS:
-    // Put your code here:
+PARTS:
+    // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+    //  1  1  1  a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+
+    // Register A
+
+    Mux16(a[0..14]=instruction[0..14], a[15]=false, b=aluOut, sel=instruction[15], out=regAIn);
+
+    Not(in=instruction[15], out=notLsb);
+    Or(a=notLsb, b=instruction[5], out=regALoad);
+
+    ARegister(in=regAIn, load=regALoad, out=regAOut, out[0..14]=addressM);
+    
+    And(a=instruction[3], b=instruction[15], out=writeM);
+
+    // Register D
+
+    And(a=instruction[4], b=instruction[15], out=regDLoad);
+    DRegister(in=aluOut, load=regDLoad, out=regDOut);
+
+    // ALU
+
+    Mux16(a=regAOut, b=inM, sel=instruction[12], out=aluY);
+
+    ALU(x=regDOut, y=aluY,
+        zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6],
+        out=aluOut, out=outM, zr=aluZr, ng=aluNg);
+
+    // PC
+
+    And(a=instruction[2], b=aluNg, out=bitLt);
+    And(a=instruction[1], b=aluZr, out=bitEq);
+    Or(a=aluZr, b=aluNg, out=aluNotPo);
+    Not(in=aluNotPo, out=aluPo);
+    And(a=instruction[0], b=aluPo, out=bitGt);
+
+    Or(a=bitLt, b=bitEq, out=pcLoad0);
+    Or(a=pcLoad0, b=bitGt, out=pcLoad1);
+    And(a=pcLoad1, b=instruction[15], out=pcLoad);
+    
+    PC(in=regAOut, load=pcLoad, inc=true, reset=reset, out[0..14]=pc, out[15]=false);
 }
