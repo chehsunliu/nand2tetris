@@ -7,12 +7,15 @@ PROJECT_7 = $(BUILD_DIR)/project7.zip
 
 %.exe:
 	@echo "Compile $@..."
-	@go build -o $@ ./cmd/main.go
+	@go build -o $@
 
-.PHONY: all
-all: $(HOST_EXE) $(CROSS_EXE) $(PROJECT_7)
+.PHONY: build
+build: $(HOST_EXE)
 
-$(CROSS_EXE): export CGO_ENABLED = 1
+.PHONY: publish
+publish: $(PROJECT_7)
+
+$(CROSS_EXE): export CGO_ENABLED = 0
 $(CROSS_EXE): export GOOS = linux
 $(CROSS_EXE): export GOARCH = amd64
 
@@ -22,6 +25,10 @@ $(CROSS_EXE): $(SRCS)
 .PHONY: clean
 clean:
 	rm -rf build
+
+.PHONY: fmt
+fmt: $(SRCS)
+	go fmt ./...
 
 $(PROJECT_7): $(CROSS_EXE) wrapper/VMTranslator.py wrapper/lang.txt
 	zip -j $@ $^
