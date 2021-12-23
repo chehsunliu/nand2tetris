@@ -2,8 +2,6 @@ package vm
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 type PushCommand struct {
@@ -24,17 +22,18 @@ D=A
 A=M
 M=D
 @SP
-M=M+1`
+M=M+1
+`
 
-func (c *PushCommand) translateConstant(index int) string {
-	data := struct{ Index int }{Index: index}
+func (c *PushCommand) translateConstant() string {
+	data := struct{ Index int }{Index: c.index}
 	return fillTemplate(pushConstantTemplate, data)
 }
 
 func (c *PushCommand) Translate() string {
 	switch c.segment {
 	case "constant":
-		return c.translateConstant(c.index)
+		return c.translateConstant()
 
 	default:
 		return ""
@@ -43,19 +42,4 @@ func (c *PushCommand) Translate() string {
 
 func (c *PushCommand) String() string {
 	return fmt.Sprintf("push %s %d", c.segment, c.index)
-}
-
-func NewPushCommand(s string, state *ParserState) (*PushCommand, error) {
-	tokens := strings.Split(s, " ")
-
-	if len(tokens) != 3 {
-		return nil, fmt.Errorf("expect 3 tokens but only got %d: %v", len(tokens), tokens)
-	}
-
-	arg2, err := strconv.Atoi(tokens[2])
-	if err != nil {
-		return nil, err
-	}
-
-	return &PushCommand{raw: s, segment: tokens[1], index: arg2, state: state}, nil
 }

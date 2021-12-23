@@ -35,7 +35,7 @@ func Translate(options *Options) error {
 			return err
 		}
 
-		if _, err := fmt.Fprintln(outputFile, strings.TrimSpace(cmd.Translate())); err != nil {
+		if _, err := fmt.Fprintln(outputFile, strings.TrimSpace(cmd.Translate())+"\n"); err != nil {
 			return err
 		}
 	}

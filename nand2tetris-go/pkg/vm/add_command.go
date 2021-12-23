@@ -16,9 +16,8 @@ A=A-1  // A = 258 - 1 = 257
 D=M    // D = M[257] = 8
 A=A-1  // A = 257 - 1 = 256
 M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
-@SP    // A = SP = 0
-D=M    // D = M[0] = 258
-M=D-1  // M[0] = 258 - 1 = 257
+@SP
+M=M-1
 `
 
 func (c *AddCommand) Translate() string {
