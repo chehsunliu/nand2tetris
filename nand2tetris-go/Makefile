@@ -32,3 +32,7 @@ fmt: $(SRCS)
 
 $(PROJECT_7): $(CROSS_EXE) wrapper/VMTranslator.py wrapper/lang.txt
 	zip -j $@ $^
+
+.PHONY: test7
+test7: $(HOST_EXE)
+	./scripts/test7.sh
