@@ -11,9 +11,9 @@ type Parser struct {
 	state   *ParserState
 }
 
-func NewParser(r io.Reader) *Parser {
+func NewParser(r io.Reader, filename string) *Parser {
 	scanner := bufio.NewScanner(r)
-	return &Parser{scanner: scanner, state: &ParserState{}}
+	return &Parser{scanner: scanner, state: &ParserState{filename: filename}}
 }
 
 func (p *Parser) HasMoreCommands() bool {

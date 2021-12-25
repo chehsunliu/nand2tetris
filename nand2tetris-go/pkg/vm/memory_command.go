@@ -91,6 +91,21 @@ func (c *PushCommand) translatePointer() string {
 	return fillTemplate(pushPointerTemplate, data)
 }
 
+const pushStaticTemplate = `
+@{{ .Symbol }}
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+`
+
+func (c *PushCommand) translateStatic() string {
+	data := struct{ Symbol string }{Symbol: c.state.GetStaticSymbol(c.index)}
+	return fillTemplate(pushStaticTemplate, data)
+}
+
 func (c *PushCommand) Translate() string {
 	switch c.segment {
 	case "constant":
@@ -113,6 +128,9 @@ func (c *PushCommand) Translate() string {
 
 	case "pointer":
 		return c.translatePointer()
+
+	case "static":
+		return c.translateStatic()
 
 	default:
 		return ""
@@ -203,6 +221,20 @@ func (c *PopCommand) translatePointer() string {
 	return fillTemplate(popPointerTemplate, data)
 }
 
+const popStaticTemplate = `
+@SP
+M=M-1  // SP--
+A=M
+D=M    // D = M[M[SP]]
+@{{ .Symbol }}
+M=D
+`
+
+func (c *PopCommand) translateStatic() string {
+	data := struct{ Symbol string }{Symbol: c.state.GetStaticSymbol(c.index)}
+	return fillTemplate(popStaticTemplate, data)
+}
+
 func (c *PopCommand) Translate() string {
 	switch c.segment {
 	case "local":
@@ -222,6 +254,9 @@ func (c *PopCommand) Translate() string {
 
 	case "pointer":
 		return c.translatePointer()
+
+	case "static":
+		return c.translateStatic()
 
 	default:
 		return ""

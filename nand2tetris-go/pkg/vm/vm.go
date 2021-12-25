@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -24,7 +25,9 @@ func Translate(options *Options) error {
 	}
 	defer outputFile.Close()
 
-	parser := NewParser(f)
+	filename := strings.TrimSuffix(filepath.Base(outputPath), ".asm")
+
+	parser := NewParser(f, filename)
 	for parser.HasMoreCommands() {
 		cmd, err := parser.ParseCommand()
 		if err != nil {
