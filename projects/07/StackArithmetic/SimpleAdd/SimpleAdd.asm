@@ -1,4 +1,4 @@
-// push constant 7
+// Push { segment: "constant", index: 7 }
 @7
 D=A
 @SP
@@ -7,7 +7,7 @@ M=D
 @SP
 M=M+1
 
-// push constant 8
+// Push { segment: "constant", index: 8 }
 @8
 D=A
 @SP
@@ -16,13 +16,13 @@ M=D
 @SP
 M=M+1
 
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
+// Add
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=D+M
 @SP
 M=M-1
 

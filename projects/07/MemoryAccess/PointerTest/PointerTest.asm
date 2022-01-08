@@ -1,4 +1,4 @@
-// push constant 3030
+// Push { segment: "constant", index: 3030 }
 @3030
 D=A
 @SP
@@ -7,15 +7,15 @@ M=D
 @SP
 M=M+1
 
-// pop pointer 0
+// Pop { segment: "pointer", index: 0 }
 @SP
-M=M-1  // SP--
+M=M-1
 A=M
-D=M    // D = M[M[SP]]
+D=M
 @THIS
 M=D
 
-// push constant 3040
+// Push { segment: "constant", index: 3040 }
 @3040
 D=A
 @SP
@@ -24,15 +24,15 @@ M=D
 @SP
 M=M+1
 
-// pop pointer 1
+// Pop { segment: "pointer", index: 1 }
 @SP
-M=M-1  // SP--
+M=M-1
 A=M
-D=M    // D = M[M[SP]]
+D=M
 @THAT
 M=D
 
-// push constant 32
+// Push { segment: "constant", index: 32 }
 @32
 D=A
 @SP
@@ -41,23 +41,23 @@ M=D
 @SP
 M=M+1
 
-// pop this 2
-@2  // A = i
-D=A        // D = i
+// Pop { segment: "this", index: 2 }
+@2
+D=A
 @THIS
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// push constant 46
+// Push { segment: "constant", index: 46 }
 @46
 D=A
 @SP
@@ -66,91 +66,91 @@ M=D
 @SP
 M=M+1
 
-// pop that 6
-@6  // A = i
-D=A        // D = i
-@THAT
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
-@SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
-A=M
-M=D
-
-// push pointer 0
-@THIS
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-
-// push pointer 1
-@THAT
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
-@SP
-M=M-1
-
-// push this 2
-@2
-D=A        // D = I
-@THIS
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
-@SP
-A=M
-M=D        // M[M[SP]] = D
-@SP
-M=M+1
-
-// sub
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] (y)
-A=A-1  // A = 257 - 1 = 256
-M=M-D  // M[256] = x - y
-@SP
-M=M-1
-
-// push that 6
+// Pop { segment: "that", index: 6 }
 @6
-D=A        // D = I
+D=A
 @THAT
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+D=D+M
 @SP
 A=M
-M=D        // M[M[SP]] = D
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
+A=M
+M=D
+
+// Push { segment: "pointer", index: 0 }
+@THIS
+D=M
+@SP
+A=M
+M=D
 @SP
 M=M+1
 
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
+// Push { segment: "pointer", index: 1 }
+@THAT
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+// Add
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=D+M
+@SP
+M=M-1
+
+// Push { segment: "this", index: 2 }
+@2
+D=A
+@THIS
+A=D+M
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+// Sub
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=M-D
+@SP
+M=M-1
+
+// Push { segment: "that", index: 6 }
+@6
+D=A
+@THAT
+A=D+M
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+// Add
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=D+M
 @SP
 M=M-1
 

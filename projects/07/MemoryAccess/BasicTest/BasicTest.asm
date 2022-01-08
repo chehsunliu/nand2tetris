@@ -1,4 +1,4 @@
-// push constant 10
+// Push { segment: "constant", index: 10 }
 @10
 D=A
 @SP
@@ -7,23 +7,23 @@ M=D
 @SP
 M=M+1
 
-// pop local 0
-@0  // A = i
-D=A        // D = i
+// Pop { segment: "local", index: 0 }
+@0
+D=A
 @LCL
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// push constant 21
+// Push { segment: "constant", index: 21 }
 @21
 D=A
 @SP
@@ -32,7 +32,7 @@ M=D
 @SP
 M=M+1
 
-// push constant 22
+// Push { segment: "constant", index: 22 }
 @22
 D=A
 @SP
@@ -41,39 +41,39 @@ M=D
 @SP
 M=M+1
 
-// pop argument 2
-@2  // A = i
-D=A        // D = i
+// Pop { segment: "argument", index: 2 }
+@2
+D=A
 @ARG
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// pop argument 1
-@1  // A = i
-D=A        // D = i
+// Pop { segment: "argument", index: 1 }
+@1
+D=A
 @ARG
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// push constant 36
+// Push { segment: "constant", index: 36 }
 @36
 D=A
 @SP
@@ -82,23 +82,23 @@ M=D
 @SP
 M=M+1
 
-// pop this 6
-@6  // A = i
-D=A        // D = i
+// Pop { segment: "this", index: 6 }
+@6
+D=A
 @THIS
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// push constant 42
+// Push { segment: "constant", index: 42 }
 @42
 D=A
 @SP
@@ -107,7 +107,7 @@ M=D
 @SP
 M=M+1
 
-// push constant 45
+// Push { segment: "constant", index: 45 }
 @45
 D=A
 @SP
@@ -116,39 +116,39 @@ M=D
 @SP
 M=M+1
 
-// pop that 5
-@5  // A = i
-D=A        // D = i
+// Pop { segment: "that", index: 5 }
+@5
+D=A
 @THAT
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// pop that 2
-@2  // A = i
-D=A        // D = i
+// Pop { segment: "that", index: 2 }
+@2
+D=A
 @THAT
-D=D+M      // D = i + M[LCL]
-@SP        // A = SP
-A=M        // A = M[SP]
-M=D        // M[M[SP]] = i + M[LCL]
+D=D+M
 @SP
-M=M-1      // M[SP] = M[SP] - 1
-A=M        // A = M[SP]
-D=M        // D = M[M[SP]]
-A=A+1      // A = M[SP] + 1
+A=M
+M=D
+@SP
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// push constant 510
+// Push { segment: "constant", index: 510 }
 @510
 D=A
 @SP
@@ -157,142 +157,136 @@ M=D
 @SP
 M=M+1
 
-// pop temp 6
-@6
+// Pop { segment: "temp", index: 6 }
+@11
 D=A
-@5
-D=D+A  // D = I + 5
 @SP
 A=M
-M=D    // M[M[SP]] = 5 + I
-
+M=D
 @SP
-M=M-1  // SP--
-A=M    // A = M[SP]
-D=M    // D = M[M[SP]]
-A=A+1  // A = M[SP] + 1
+M=M-1
+A=M
+D=M
+A=A+1
 A=M
 M=D
 
-// push local 0
+// Push { segment: "local", index: 0 }
 @0
-D=A        // D = I
+D=A
 @LCL
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+A=D+M
+D=M
 @SP
 A=M
-M=D        // M[M[SP]] = D
+M=D
 @SP
 M=M+1
 
-// push that 5
+// Push { segment: "that", index: 5 }
 @5
-D=A        // D = I
+D=A
 @THAT
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+A=D+M
+D=M
 @SP
 A=M
-M=D        // M[M[SP]] = D
+M=D
 @SP
 M=M+1
 
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
+// Add
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=D+M
 @SP
 M=M-1
 
-// push argument 1
+// Push { segment: "argument", index: 1 }
 @1
-D=A        // D = I
+D=A
 @ARG
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+A=D+M
+D=M
 @SP
 A=M
-M=D        // M[M[SP]] = D
+M=D
 @SP
 M=M+1
 
-// sub
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] (y)
-A=A-1  // A = 257 - 1 = 256
-M=M-D  // M[256] = x - y
+// Sub
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=M-D
 @SP
 M=M-1
 
-// push this 6
+// Push { segment: "this", index: 6 }
 @6
-D=A        // D = I
+D=A
 @THIS
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+A=D+M
+D=M
 @SP
 A=M
-M=D        // M[M[SP]] = D
+M=D
 @SP
 M=M+1
 
-// push this 6
+// Push { segment: "this", index: 6 }
 @6
-D=A        // D = I
+D=A
 @THIS
-A=D+M      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+A=D+M
+D=M
 @SP
 A=M
-M=D        // M[M[SP]] = D
+M=D
 @SP
 M=M+1
 
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
-@SP
-M=M-1
-
-// sub
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] (y)
-A=A-1  // A = 257 - 1 = 256
-M=M-D  // M[256] = x - y
-@SP
-M=M-1
-
-// push temp 6
-@6
-D=A        // D = I
-@5
-A=D+A      // A = I + M[LCL]
-D=M        // D = M[I+M[LCL]]
+// Add
 @SP
 A=M
-M=D        // M[M[SP]] = D
+A=A-1
+D=M
+A=A-1
+M=D+M
+@SP
+M=M-1
+
+// Sub
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=M-D
+@SP
+M=M-1
+
+// Push { segment: "temp", index: 6 }
+@R11
+D=M
+@SP
+A=M
+M=D
 @SP
 M=M+1
 
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
+// Add
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=D+M
 @SP
 M=M-1
 

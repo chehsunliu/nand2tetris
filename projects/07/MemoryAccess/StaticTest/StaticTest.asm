@@ -1,4 +1,4 @@
-// push constant 111
+// Push { segment: "constant", index: 111 }
 @111
 D=A
 @SP
@@ -7,7 +7,7 @@ M=D
 @SP
 M=M+1
 
-// push constant 333
+// Push { segment: "constant", index: 333 }
 @333
 D=A
 @SP
@@ -16,7 +16,7 @@ M=D
 @SP
 M=M+1
 
-// push constant 888
+// Push { segment: "constant", index: 888 }
 @888
 D=A
 @SP
@@ -25,31 +25,31 @@ M=D
 @SP
 M=M+1
 
-// pop static 8
+// Pop { segment: "static", index: 8 }
 @SP
-M=M-1  // SP--
+M=M-1
 A=M
-D=M    // D = M[M[SP]]
+D=M
 @StaticTest.8
 M=D
 
-// pop static 3
+// Pop { segment: "static", index: 3 }
 @SP
-M=M-1  // SP--
+M=M-1
 A=M
-D=M    // D = M[M[SP]]
+D=M
 @StaticTest.3
 M=D
 
-// pop static 1
+// Pop { segment: "static", index: 1 }
 @SP
-M=M-1  // SP--
+M=M-1
 A=M
-D=M    // D = M[M[SP]]
+D=M
 @StaticTest.1
 M=D
 
-// push static 3
+// Push { segment: "static", index: 3 }
 @StaticTest.3
 D=M
 @SP
@@ -58,7 +58,7 @@ M=D
 @SP
 M=M+1
 
-// push static 1
+// Push { segment: "static", index: 1 }
 @StaticTest.1
 D=M
 @SP
@@ -67,17 +67,17 @@ M=D
 @SP
 M=M+1
 
-// sub
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] (y)
-A=A-1  // A = 257 - 1 = 256
-M=M-D  // M[256] = x - y
+// Sub
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=M-D
 @SP
 M=M-1
 
-// push static 8
+// Push { segment: "static", index: 8 }
 @StaticTest.8
 D=M
 @SP
@@ -86,13 +86,13 @@ M=D
 @SP
 M=M+1
 
-// add
-@SP    // A = SP = 0
-A=M    // A = M[0] = 258
-A=A-1  // A = 258 - 1 = 257
-D=M    // D = M[257] = 8
-A=A-1  // A = 257 - 1 = 256
-M=D+M  // M[256] = 8 + M[256] = 8 + 7 = 15
+// Add
+@SP
+A=M
+A=A-1
+D=M
+A=A-1
+M=D+M
 @SP
 M=M-1
 
