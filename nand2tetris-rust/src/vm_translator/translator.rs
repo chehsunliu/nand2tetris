@@ -1,9 +1,10 @@
-use crate::vm_translator::command::Command;
-use crate::vm_translator::label::Label;
 use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path::Path;
+
+use crate::vm_translator::command::Command;
+use crate::vm_translator::label::Label;
 
 pub struct Translator {
     f: File,
