@@ -43,6 +43,8 @@ impl Translator {
             Command::Label(label) => self.translate_label(label),
             Command::IfGoto(label) => self.translate_if_goto(label),
             Command::Goto(label) => self.translate_goto(label),
+            Command::Function { name, locals } => self.translate_function(name, *locals),
+            Command::Return => self.translate_return(),
         };
         let output = format!("// {:?}\n{}\n\n", cmd, output);
 
@@ -273,5 +275,66 @@ D=M
 M=D",
             segment,
         )
+    }
+}
+
+impl Translator {
+    fn translate_function(&self, name: &str, locals: i32) -> String {
+        let mut out = format!("({})\n", name);
+        for i in 0..locals {
+            out.push_str(&self.translate_push_constant(0));
+            if i != locals - 1 {
+                out.push('\n');
+            }
+        }
+        out
+    }
+
+    fn translate_return(&self) -> String {
+        "\
+@LCL  // Backup M[LCL] to M[frame]
+D=M
+@frame
+M=D
+
+@SP  // Store return value to M[M[ARG]]
+A=M-1
+D=M
+@ARG
+A=M
+M=D
+
+@ARG  // M[SP] = M[ARG] + 1
+D=M+1
+@SP
+M=D
+
+@frame  // Restore THAT
+AM=M-1
+D=M
+@THAT
+M=D
+
+@frame  // Restore THIS
+AM=M-1
+D=M
+@THIS
+M=D
+
+@frame  // Restore ARG
+AM=M-1
+D=M
+@ARG
+M=D
+
+@frame  // Restore LCL
+AM=M-1
+D=M
+@LCL
+M=D
+
+@frame  // Go to RET
+A=M-1
+0;JMP".to_string()
     }
 }

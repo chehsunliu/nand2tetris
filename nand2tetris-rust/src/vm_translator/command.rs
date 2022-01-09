@@ -14,6 +14,8 @@ pub enum Command {
     Label(String),
     IfGoto(String),
     Goto(String),
+    Function { name: String, locals: i32 },
+    Return,
 }
 
 impl Command {
@@ -41,6 +43,11 @@ impl Command {
             "label" => Command::Label(tokens[1].to_string()),
             "if-goto" => Command::IfGoto(tokens[1].to_string()),
             "goto" => Command::Goto(tokens[1].to_string()),
+            "function" => Command::Function {
+                name: tokens[1].to_string(),
+                locals: tokens[2].parse().unwrap(),
+            },
+            "return" => Command::Return,
             _ => panic!("Unknown command: {}", cmd),
         }
     }

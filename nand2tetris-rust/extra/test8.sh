@@ -14,6 +14,7 @@ project_dir="$script_dir/../../projects/08"
 vm_codes=(
   $project_dir/ProgramFlow/BasicLoop/BasicLoop.vm
   $project_dir/ProgramFlow/FibonacciSeries/FibonacciSeries.vm
+  $project_dir/FunctionCalls/SimpleFunction/SimpleFunction.vm
 )
 
 for vm_code in "${vm_codes[@]}"; do
