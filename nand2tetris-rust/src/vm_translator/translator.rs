@@ -4,27 +4,29 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::vm_translator::command::Command;
-use crate::vm_translator::label::Label;
+use crate::vm_translator::meta::Meta;
 
 pub struct Translator {
     f: File,
-    static_prefix: String,
-    label: Label,
+    meta: Meta,
 }
 
 impl Translator {
     pub fn new(output_path: &str) -> io::Result<Translator> {
-        let p = Path::new(output_path);
-        let filename = p.file_name().unwrap().to_str().unwrap();
-        let ext = p.extension().unwrap().to_str().unwrap();
-        let static_prefix = filename.trim_end_matches(ext).to_string();
-
         let translator = Translator {
             f: File::create(&output_path)?,
-            static_prefix,
-            label: Label::new(),
+            meta: Meta::new(),
         };
         Ok(translator)
+    }
+
+    pub fn set_vm_name(&mut self, input_path: &str) {
+        let p = Path::new(input_path);
+        let filename = p.file_name().unwrap().to_str().unwrap();
+        let ext = p.extension().unwrap().to_str().unwrap();
+        let name = filename.trim_end_matches(ext).trim_end_matches(".");
+
+        self.meta.set_vm_name(name);
     }
 
     pub fn write(&mut self, cmd: &Command) -> std::io::Result<usize> {
@@ -79,7 +81,7 @@ A=A-1
         )
     }
 
-    fn translate_comparison(&self, operation: &str) -> String {
+    fn translate_comparison(&mut self, operation: &str) -> String {
         format!(
             "\
 @SP
@@ -110,8 +112,8 @@ M=-1
 @SP
 M=M-1",
             operation = operation,
-            label_true = self.label.get(),
-            label_move_sp_up = self.label.get(),
+            label_true = self.meta.generate_label(),
+            label_move_sp_up = self.meta.generate_label(),
         )
     }
 
@@ -151,7 +153,7 @@ impl Translator {
             "this" => self.translate_push_local("THIS", index),
             "that" => self.translate_push_local("THAT", index),
             "pointer" => self.translate_push_pointer(if index == 0 { "THIS" } else { "THAT" }),
-            "static" => self.translate_push_pointer(&format!("{}{}", self.static_prefix, index)),
+            "static" => self.translate_push_pointer(&self.meta.generate_static_address(index)),
             "temp" => self.translate_push_temp(index),
             _ => panic!("Unknown push command: {}", segment),
         }
@@ -217,7 +219,7 @@ impl Translator {
             "this" => self.translate_pop_local("THIS", index),
             "that" => self.translate_pop_local("THAT", index),
             "pointer" => self.translate_pop_pointer(if index == 0 { "THIS" } else { "THAT" }),
-            "static" => self.translate_pop_pointer(&format!("{}{}", self.static_prefix, index)),
+            "static" => self.translate_pop_pointer(&self.meta.generate_static_address(index)),
             "temp" => self.translate_pop_temp(index),
             _ => panic!("Unknown pop command: {}", segment),
         }
@@ -335,6 +337,7 @@ M=D
 
 @frame  // Go to RET
 A=M-1
-0;JMP".to_string()
+0;JMP"
+            .to_string()
     }
 }
