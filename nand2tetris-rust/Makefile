@@ -6,6 +6,7 @@ host_exe = ./target/debug/$(exe)
 client_exe = ./target/$(client_platform)/release/$(exe)
 
 project7_zip = ./target/project7.zip 
+project8_zip = ./target/project8.zip 
 
 # -------------------- Build -------------------- 
 
@@ -24,12 +25,22 @@ $(client_exe): $(srcs)
 test7: $(host_exe)
 	@./extra/test7.sh
 
+.PHONY: test8
+test8: $(host_exe)
+	@./extra/test8.sh
+
 # -------------------- Publish -------------------- 
 
 .PHONY: project7
 project7: $(project7_zip)
 
 $(project7_zip): $(client_exe) ./extra/VMTranslator.py ./extra/lang.txt
+	@zip -j $@ $^
+
+.PHONY: project8
+project8: $(project8_zip)
+
+$(project8_zip): $(client_exe) ./extra/VMTranslator.py ./extra/lang.txt
 	@zip -j $@ $^
 
 # -------------------- Misc -------------------- 

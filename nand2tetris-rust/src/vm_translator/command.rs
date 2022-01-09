@@ -11,6 +11,9 @@ pub enum Command {
     And,
     Or,
     Not,
+    Label(String),
+    IfGoto(String),
+    Goto(String),
 }
 
 impl Command {
@@ -35,6 +38,9 @@ impl Command {
                 segment: tokens[1].to_string(),
                 index: tokens[2].parse::<i32>().unwrap(),
             },
+            "label" => Command::Label(tokens[1].to_string()),
+            "if-goto" => Command::IfGoto(tokens[1].to_string()),
+            "goto" => Command::Goto(tokens[1].to_string()),
             _ => panic!("Unknown command: {}", cmd),
         }
     }

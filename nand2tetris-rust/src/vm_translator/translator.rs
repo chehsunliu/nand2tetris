@@ -40,6 +40,9 @@ impl Translator {
             Command::Gt => self.translate_comparison("JLT"),
             Command::Push { segment, index } => self.translate_push(segment, *index),
             Command::Pop { segment, index } => self.translate_pop(segment, *index),
+            Command::Label(label) => self.translate_label(label),
+            Command::IfGoto(label) => self.translate_if_goto(label),
+            Command::Goto(label) => self.translate_goto(label),
         };
         let output = format!("// {:?}\n{}\n\n", cmd, output);
 
@@ -107,6 +110,32 @@ M=M-1",
             operation = operation,
             label_true = self.label.get(),
             label_move_sp_up = self.label.get(),
+        )
+    }
+
+    fn translate_label(&self, label: &str) -> String {
+        format!("({})", label)
+    }
+
+    fn translate_if_goto(&self, label: &str) -> String {
+        format!(
+            "\
+@SP
+M=M-1
+A=M
+D=M
+@{}
+D;JGT",
+            label
+        )
+    }
+
+    fn translate_goto(&self, label: &str) -> String {
+        format!(
+            "\
+@{}
+0;JMP",
+            label
         )
     }
 }
