@@ -141,7 +141,7 @@ M=M-1
 A=M
 D=M
 @LOOP_START
-D;JGT
+D;JNE
 
 // Push { segment: "local", index: 0 }
 @0

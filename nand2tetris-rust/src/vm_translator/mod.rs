@@ -48,6 +48,10 @@ pub fn run(input_path: &str) -> Result<(), Box<dyn Error>> {
 
     let mut translator = Translator::new(&output_path)?;
 
+    if input_paths.len() > 1 {
+        translator.write_init()?;
+    }
+
     for input_path in input_paths.iter() {
         let parser = Parser::new(input_path)?;
         translator.set_vm_name(input_path);

@@ -9,7 +9,7 @@ impl Meta {
         Meta {
             counter: 0,
             vm_name: None,
-            function_name: None
+            function_name: None,
         }
     }
 
@@ -21,10 +21,23 @@ impl Meta {
         self.function_name = Some(name.to_string());
     }
 
-    pub fn generate_label(&mut self) -> String {
+    pub fn generate_implicit_label(&mut self) -> String {
         let v = self.counter;
         self.counter += 1;
         format!("_LABEL.{}", v)
+    }
+
+    pub fn generate_label(&self, label: &str) -> String {
+        match self.function_name.as_ref() {
+            Some(function_name) => format!("{}.{}", function_name, label),
+            None => label.to_string(),
+        }
+    }
+
+    pub fn generate_return_address(&mut self, name: &str) -> String {
+        let v = self.counter;
+        self.counter += 1;
+        format!("RET_ADDRESS_{}{}", name, v)
     }
 
     pub fn generate_static_address(&self, index: i32) -> String {

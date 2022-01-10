@@ -14,6 +14,7 @@ pub enum Command {
     Label(String),
     IfGoto(String),
     Goto(String),
+    Call { name: String, args: i32 },
     Function { name: String, locals: i32 },
     Return,
 }
@@ -43,6 +44,10 @@ impl Command {
             "label" => Command::Label(tokens[1].to_string()),
             "if-goto" => Command::IfGoto(tokens[1].to_string()),
             "goto" => Command::Goto(tokens[1].to_string()),
+            "call" => Command::Call {
+                name: tokens[1].to_string(),
+                args: tokens[2].parse().unwrap(),
+            },
             "function" => Command::Function {
                 name: tokens[1].to_string(),
                 locals: tokens[2].parse().unwrap(),

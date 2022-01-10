@@ -143,5 +143,6 @@ M=D
 
 @frame  // Go to RET
 A=M-1
+A=M
 0;JMP
 

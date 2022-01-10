@@ -29,6 +29,22 @@ impl Translator {
         self.meta.set_vm_name(name);
     }
 
+    pub fn write_init(&mut self) -> std::io::Result<usize> {
+        let output = format!(
+            "\
+@256
+D=A
+@SP
+M=D
+
+{}
+
+",
+            self.translate_call("Sys.init", 0)
+        );
+        self.f.write(output.as_bytes())
+    }
+
     pub fn write(&mut self, cmd: &Command) -> std::io::Result<usize> {
         let output = match cmd {
             Command::Add => self.translate_binary_operation("M=D+M"),
@@ -45,6 +61,7 @@ impl Translator {
             Command::Label(label) => self.translate_label(label),
             Command::IfGoto(label) => self.translate_if_goto(label),
             Command::Goto(label) => self.translate_goto(label),
+            Command::Call { name, args } => self.translate_call(name, *args),
             Command::Function { name, locals } => self.translate_function(name, *locals),
             Command::Return => self.translate_return(),
         };
@@ -112,13 +129,13 @@ M=-1
 @SP
 M=M-1",
             operation = operation,
-            label_true = self.meta.generate_label(),
-            label_move_sp_up = self.meta.generate_label(),
+            label_true = self.meta.generate_implicit_label(),
+            label_move_sp_up = self.meta.generate_implicit_label(),
         )
     }
 
     fn translate_label(&self, label: &str) -> String {
-        format!("({})", label)
+        format!("({})", self.meta.generate_label(label))
     }
 
     fn translate_if_goto(&self, label: &str) -> String {
@@ -129,8 +146,8 @@ M=M-1
 A=M
 D=M
 @{}
-D;JGT",
-            label
+D;JNE",
+            self.meta.generate_label(label)
         )
     }
 
@@ -139,7 +156,7 @@ D;JGT",
             "\
 @{}
 0;JMP",
-            label
+            self.meta.generate_label(label)
         )
     }
 }
@@ -281,7 +298,75 @@ M=D",
 }
 
 impl Translator {
-    fn translate_function(&self, name: &str, locals: i32) -> String {
+    fn translate_call(&mut self, name: &str, args: i32) -> String {
+        let return_address = self.meta.generate_return_address(name);
+        format!(
+            "\
+@{return_address}
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+@LCL
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+@ARG
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+@THIS
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+@THAT
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+@SP
+D=M
+@{offset}
+D=D-A
+@ARG
+M=D
+
+@SP
+D=M
+@LCL
+M=D
+
+@{function_name}
+0;JMP
+
+({return_address})",
+            function_name = name,
+            offset = 5 + args,
+            return_address = return_address,
+        )
+    }
+
+    fn translate_function(&mut self, name: &str, locals: i32) -> String {
+        self.meta.set_function_name(name);
+
         let mut out = format!("({})\n", name);
         for i in 0..locals {
             out.push_str(&self.translate_push_constant(0));
@@ -289,6 +374,7 @@ impl Translator {
                 out.push('\n');
             }
         }
+
         out
     }
 
@@ -337,6 +423,7 @@ M=D
 
 @frame  // Go to RET
 A=M-1
+A=M
 0;JMP"
             .to_string()
     }
