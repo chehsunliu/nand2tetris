@@ -105,6 +105,16 @@ D=M
 @frame
 M=D
 
+@frame
+A=M-1
+A=A-1
+A=A-1
+A=A-1
+A=A-1
+D=M
+@retaddr
+M=D
+
 @SP  // Store return value to M[M[ARG]]
 A=M-1
 D=M
@@ -141,8 +151,7 @@ D=M
 @LCL
 M=D
 
-@frame  // Go to RET
-A=M-1
+@retaddr  // Go to RET
 A=M
 0;JMP
 

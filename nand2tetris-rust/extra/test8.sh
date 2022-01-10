@@ -32,12 +32,12 @@ echo "> $input_path"
 nand2tetris-rust vm-translator --input-path $input_path
 CPUEmulator.sh $project_dir/FunctionCalls/FibonacciElement/FibonacciElement.tst
 
-input_path=$project_dir/FunctionCalls/StaticsTest
-echo "> $input_path"
-nand2tetris-rust vm-translator --input-path $input_path
-CPUEmulator.sh $project_dir/FunctionCalls/StaticsTest/StaticsTest.tst
-
 input_path=$project_dir/FunctionCalls/NestedCall
 echo "> $input_path"
 nand2tetris-rust vm-translator --input-path $input_path
 CPUEmulator.sh $project_dir/FunctionCalls/NestedCall/NestedCall.tst
+
+input_path=$project_dir/FunctionCalls/StaticsTest
+echo "> $input_path"
+nand2tetris-rust vm-translator --input-path $input_path
+CPUEmulator.sh $project_dir/FunctionCalls/StaticsTest/StaticsTest.tst
