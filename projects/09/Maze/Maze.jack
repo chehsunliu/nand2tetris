@@ -1,0 +1,387 @@
+class Maze {
+  field Array _maze;
+  field int _rows;
+  field int _cols;
+  field int _pixels;
+
+  field int _counter;
+  field int _startI;
+  field int _startJ;
+  field int _currentI;
+  field int _currentJ;
+
+  field int _maxDepth;
+  field int _terminalI;
+  field int _terminalJ;
+
+  constructor Maze new() {
+    var int i;
+    var int j;
+    var Array cells;
+
+    let _rows = 16;
+    let _cols = 32;
+    let _maze = Array.new(_rows);
+    let _pixels = 16;
+
+    let _counter = 0;
+    let _startI = 5;
+    let _startJ = 26;
+    let _currentI = _startI;
+    let _currentJ = _startJ;
+
+    let _maxDepth = 0;
+    let _terminalI = 0;
+    let _terminalJ = 0;
+
+    let i = 0; while (i < _rows) {
+      let _maze[i] = Array.new(_cols);
+      let cells = _maze[i];
+
+      let j = 0; while (j < _cols) {
+        let cells[j] = Cell.new();
+
+        let j = j + 1;
+      }
+
+      let i = i + 1;
+    }
+
+    return this;
+  }
+
+  method Cell getCell(int i, int j) {
+    var Array rowCells;
+    let rowCells = _maze[i];
+    return rowCells[j];
+  }
+
+  method boolean isWalkable(int i, int j) {
+    var Cell cell;
+    let cell = getCell(i, j);
+    return cell.isVisited();
+  }
+
+  method void check() {
+    var Cell cell;
+    let cell = getCell(_currentI, _currentJ);
+
+    if (cell.isTerminal()) {
+      do Screen.clearScreen();
+      do Output.printString("Win!");
+      do Sys.halt();
+    }
+
+    return;
+  }
+
+  method void init() {
+    do dfs();
+    do draw();
+    do drawTerminal();
+    do drawCircle(_startI, _startJ, true);
+    return;
+  }
+
+  method void dfs() {
+    var Cell cell;
+
+    let _counter = 0;
+    do dfsVisit(_startI, _startJ, 0);
+
+    let cell = getCell(_terminalI, _terminalJ);
+    do cell.setTerminal(true);
+
+    return;
+  }
+
+  // I was unable to create a random DFS behavior, so I used
+  // several if-else instead.
+  method boolean dfsVisit(int i, int j, int depth) {
+    var Cell cell;
+    var int nI;
+    var int nJ;
+
+    if (((i = _rows) | (i > _rows)) | (i < 0)) {
+      return false;
+    }
+
+    if (((j = _cols) | (j > _cols)) | (j < 0)) {
+      return false;
+    }
+
+    let cell = getCell(i, j);
+
+    if (cell.isVisited()) {
+      return false;
+    }
+
+    do cell.setVisited(true);
+    let _counter = _counter + 1;
+
+    if (depth > _maxDepth) {
+      let _maxDepth = depth;
+      let _terminalI = i;
+      let _terminalJ = j;
+    }
+    let depth = depth + 1;
+
+    if (_counter > 50) {
+      if (dfsVisit(i + 2, j, depth)) {
+        let cell = getCell(i + 1, j);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i, j + 2, depth)) {
+        let cell = getCell(i, j + 1);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i - 2, j, depth)) {
+        let cell = getCell(i - 1, j);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i, j - 2, depth)) {
+        let cell = getCell(i, j - 1);
+        do cell.setVisited(true);
+      }
+
+      return true;
+    }
+
+    if (_counter > 40) {
+      if (dfsVisit(i - 2, j, depth)) {
+        let cell = getCell(i - 1, j);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i, j - 2, depth)) {
+        let cell = getCell(i, j - 1);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i + 2, j, depth)) {
+        let cell = getCell(i + 1, j);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i, j + 2, depth)) {
+        let cell = getCell(i, j + 1);
+        do cell.setVisited(true);
+      }
+
+      return true;
+    }
+
+    if (_counter > 25) {
+      if (dfsVisit(i - 2, j, depth)) {
+        let cell = getCell(i - 1, j);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i, j + 2, depth)) {
+        let cell = getCell(i, j + 1);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i, j - 2, depth)) {
+        let cell = getCell(i, j - 1);
+        do cell.setVisited(true);
+      }
+
+      if (dfsVisit(i + 2, j, depth)) {
+        let cell = getCell(i + 1, j);
+        do cell.setVisited(true);
+      }
+
+      return true;
+    }
+
+    if (dfsVisit(i + 2, j, depth)) {
+      let cell = getCell(i + 1, j);
+      do cell.setVisited(true);
+    }
+
+    if (dfsVisit(i, j + 2, depth)) {
+      let cell = getCell(i, j + 1);
+      do cell.setVisited(true);
+    }
+
+    if (dfsVisit(i, j - 2, depth)) {
+      let cell = getCell(i, j - 1);
+      do cell.setVisited(true);
+    }
+
+    if (dfsVisit(i - 2, j, depth)) {
+      let cell = getCell(i - 1, j);
+      do cell.setVisited(true);
+    }
+
+    return true;
+  }
+
+  method void draw() {
+    var int i;
+    var int j;
+    var int y;
+    var int x;
+    var Array rowCells;
+    var Cell cell;
+
+    do Screen.setColor(true);
+
+    let i = 0; while (i < _rows) {
+
+      let j = 0; while (j < _cols) {
+        let rowCells = _maze[i];
+        let cell = rowCells[j];
+
+        if (~cell.isVisited()) {
+          let y = i * _pixels;
+          let x = j * _pixels;
+          do Screen.drawRectangle(x, y, x + _pixels - 1, y + _pixels - 1);
+        }
+
+        let j = j + 1;
+      }
+
+      let i = i + 1;
+    }
+
+    return;
+  }
+
+  method void drawCircle(int i, int j, boolean color) {
+    var int y;
+    var int x;
+    do Screen.setColor(color);
+
+    let y = (i * _pixels) + (_pixels / 2);
+    let x = (j * _pixels) + (_pixels / 2);
+    do Screen.drawCircle(x, y, 2);
+
+    return;
+  }
+
+  method void drawTerminal() {
+    var int y;
+    var int x;
+
+    do Screen.setColor(true);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2);
+    let x = (_terminalJ * _pixels) + (_pixels / 2);
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) + 1;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) + 1;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) + 1;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) - 1;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) - 1;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) - 1;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) - 1;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) + 1;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) + 2;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) + 2;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) + 2;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) - 2;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) - 2;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) - 2;
+    do Screen.drawCircle(x, y, 1);
+
+    let y = (_terminalI * _pixels) + (_pixels / 2) - 2;
+    let x = (_terminalJ * _pixels) + (_pixels / 2) + 2;
+    do Screen.drawCircle(x, y, 1);
+
+    return;
+  }
+
+  method void moveUp() {
+    var int nextI;
+    
+    let nextI = _currentI - 1;
+    if (~((nextI = 0) | (nextI > 0))) {
+      return;
+    }
+
+    if (~isWalkable(nextI, _currentJ)) {
+      return;
+    }
+
+    do drawCircle(_currentI, _currentJ, false);
+    let _currentI = nextI;
+    do drawCircle(_currentI, _currentJ, true);
+
+    return;
+  }
+
+  method void moveDown() {
+    var int nextI;
+    
+    let nextI = _currentI + 1;
+    if (nextI = _rows) {
+      return;
+    }
+
+    if (~isWalkable(nextI, _currentJ)) {
+      return;
+    }
+
+    do drawCircle(_currentI, _currentJ, false);
+    let _currentI = nextI;
+    do drawCircle(_currentI, _currentJ, true);
+
+    return;
+  }
+
+  method void moveLeft() {
+    var int nextJ;
+    
+    let nextJ = _currentJ - 1;
+    if (~((nextJ = 0) | (nextJ > 0))) {
+      return;
+    }
+
+    if (~isWalkable(_currentI, nextJ)) {
+      return;
+    }
+
+    do drawCircle(_currentI, _currentJ, false);
+    let _currentJ = nextJ;
+    do drawCircle(_currentI, _currentJ, true);
+
+    return;
+  }
+
+  method void moveRight() {
+    var int nextJ;
+    
+    let nextJ = _currentJ + 1;
+    if (nextJ = _cols) {
+      return;
+    }
+
+    if (~isWalkable(_currentI, nextJ)) {
+      return;
+    }
+
+    do drawCircle(_currentI, _currentJ, false);
+    let _currentJ = nextJ;
+    do drawCircle(_currentI, _currentJ, true);
+
+    return;
+  }
+}

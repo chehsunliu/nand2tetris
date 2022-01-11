@@ -1,0 +1,44 @@
+class Main {
+  function void main() {
+    var Maze maze;
+    var char key;
+    var boolean exit;
+
+    let maze = Maze.new();
+    do maze.init();
+
+    let key = 0;
+    let exit = false;
+    while (~exit) {
+      while (key = 0) {
+        let key = Keyboard.keyPressed();
+      }
+
+      if (key = 81) {
+        let exit = true;
+      }
+
+      if (key = 131) {
+        do maze.moveUp();
+      }
+
+      if (key = 133) {
+        do maze.moveDown();
+      }
+
+      if (key = 130) {
+        do maze.moveLeft();
+      }
+
+      if (key = 132) {
+        do maze.moveRight();
+      }
+
+      do maze.check();
+      do Sys.wait(40);
+      let key = Keyboard.keyPressed();
+    }
+
+    return;
+  }
+}

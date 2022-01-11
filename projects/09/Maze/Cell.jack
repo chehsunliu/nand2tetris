@@ -1,0 +1,16 @@
+class Cell {
+  field boolean visited;
+  field boolean terminal;
+
+  constructor Cell new() {
+    let visited = false;
+    let terminal = false;
+    return this;
+  }
+
+  method boolean isVisited() { return visited; }
+  method void setVisited(boolean v) { let visited = v; return; }
+
+  method boolean isTerminal() { return terminal; }
+  method void setTerminal(boolean v) { let terminal = v; return; }
+}
