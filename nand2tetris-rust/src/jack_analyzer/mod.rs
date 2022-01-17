@@ -9,8 +9,8 @@ pub fn run(input_path: &str, output_directory: &str) -> Result<(), Box<dyn Error
 
     for input_path in input_paths {
         println!(">> {}", input_path);
-        for token in Tokenizer::new(&input_path)? {
-            println!("{}", token);
+        for (l, token) in Tokenizer::new(&input_path)?.enumerate() {
+            println!("{}:{}", l, token);
         }
     }
 

@@ -21,6 +21,50 @@ impl Display for Token {
     }
 }
 
+struct Content {
+    content: Vec<u8>,
+    base_index: usize,
+    current_index: usize,
+}
+
+impl Content {
+    fn new(content: Vec<u8>) -> Content {
+        Content {
+            content,
+            base_index: 0,
+            current_index: 0,
+        }
+    }
+
+    fn char(&self) -> Option<char> {
+        self.content.get(self.current_index).map(|u| *u as char)
+    }
+
+    fn advance_base(&mut self) {
+        self.base_index += 1;
+    }
+
+    fn advance_current(&mut self) {
+        self.current_index += 1;
+    }
+
+    fn reset(&mut self) {
+        self.current_index = self.base_index;
+    }
+
+    fn cut_char(&mut self) -> char {
+        let c = self.content[self.base_index] as char;
+        self.base_index += 1;
+        c
+    }
+
+    fn cut_word(&mut self) -> String {
+        let s = String::from_utf8_lossy(&self.content[self.base_index..self.current_index]);
+        self.base_index = self.current_index;
+        s.to_string()
+    }
+}
+
 enum ParsingState {
     Initial,
     ConsumingChars,
@@ -30,41 +74,126 @@ enum ParsingState {
     OneLineComment,
     BlockComment,
     BlockCommentCanEnd,
+    End(Token),
 }
 
 pub struct Tokenizer {
-    content: Vec<u8>,
-    index: usize,
+    content: Content,
 }
 
 impl Tokenizer {
     pub fn new(input_path: &str) -> Result<Tokenizer, Box<dyn Error>> {
         let content = std::fs::read(input_path)?;
-        Ok(Tokenizer { content, index: 0 })
+        Ok(Tokenizer {
+            content: Content::new(content),
+        })
     }
 
-    fn parse_symbol(&self, i: usize) -> Token {
-        Token::Symbol(self.content[i] as char)
-    }
-
-    fn parse_chars(&self, i: usize, j: usize) -> Token {
-        let s = String::from_utf8_lossy(&self.content[i..j]);
-        match s.as_ref() {
-            "class" | "method" | "function" | "constructor" | "int" | "boolean" | "char"
-            | "void" | "var" | "static" | "field" | "let" | "do" | "if" | "else" | "while"
-            | "return" | "true" | "false" | "null" | "this" => Token::Keyword(s.to_string()),
-            _ => Token::Identifier(s.to_string()),
+    fn handle_initial(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            ' ' | '\n' => {
+                self.content.advance_base();
+                state
+            }
+            '/' => ParsingState::HasMetSlash,
+            '0'..='9' => ParsingState::ConsumingNumbers,
+            'a'..='z' | 'A'..='Z' | '_' => ParsingState::ConsumingChars,
+            '(' | ')' | '[' | ']' | '{' | '}' | ',' | ';' | '=' | '.' | '+' | '-' | '*' | '&'
+            | '|' | '~' | '<' | '>' => {
+                let token = Token::Symbol(self.content.cut_char());
+                return ParsingState::End(token);
+            }
+            '"' => {
+                self.content.advance_base();
+                ParsingState::HasMetQuote
+            }
+            _ => {
+                self.content.advance_base();
+                state
+            }
         }
     }
 
-    fn parse_integer_constant(&self, i: usize, j: usize) -> Token {
-        let s = String::from_utf8_lossy(&self.content[i..j]);
-        Token::IntegerConstant(s.parse().unwrap())
+    fn handle_consuming_chars(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            'a'..='z' | 'A'..='Z' | '0'..='9' | '_' => state,
+            _ => {
+                let s = self.content.cut_word();
+                let token = match s.as_ref() {
+                    "class" | "method" | "function" | "constructor" | "int" | "boolean"
+                    | "char" | "void" | "var" | "static" | "field" | "let" | "do" | "if"
+                    | "else" | "while" | "return" | "true" | "false" | "null" | "this" => {
+                        Token::Keyword(s.to_string())
+                    }
+                    _ => Token::Identifier(s.to_string()),
+                };
+                return ParsingState::End(token);
+            }
+        }
     }
 
-    fn parse_string_content(&self, i: usize, j: usize) -> Token {
-        let s = String::from_utf8_lossy(&self.content[i..j]);
-        Token::StringConstant(s.to_string())
+    fn handle_consuming_numbers(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            '0'..='9' => state,
+            _ => {
+                let s = self.content.cut_word();
+                let token = Token::IntegerConstant(s.parse().unwrap());
+                return ParsingState::End(token);
+            }
+        }
+    }
+
+    fn handle_has_met_quote(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            '"' => {
+                let s = self.content.cut_word();
+                let token = Token::StringConstant(s.to_string());
+                self.content.advance_base();
+                return ParsingState::End(token);
+            }
+            _ => state,
+        }
+    }
+
+    fn handle_has_met_slash(&mut self) -> ParsingState {
+        match self.content.char().unwrap() {
+            '/' => ParsingState::OneLineComment,
+            '*' => ParsingState::BlockComment,
+            _ => {
+                let token = Token::Symbol(self.content.cut_char());
+                return ParsingState::End(token);
+            }
+        }
+    }
+
+    fn handle_one_line_comment(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            '\n' => {
+                self.content.cut_word();
+                self.content.advance_base();
+                ParsingState::Initial
+            }
+            _ => state,
+        }
+    }
+
+    fn handle_block_comment(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            '*' => ParsingState::BlockCommentCanEnd,
+            _ => state,
+        }
+    }
+
+    fn handle_block_comment_can_end(&mut self, state: ParsingState) -> ParsingState {
+        match self.content.char().unwrap() {
+            '/' => {
+                self.content.cut_word();
+                self.content.advance_base();
+                ParsingState::Initial
+            }
+            '*' => state,
+            _ => ParsingState::BlockComment,
+        }
     }
 }
 
@@ -73,89 +202,26 @@ impl Iterator for Tokenizer {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut state = ParsingState::Initial;
-        let mut j = self.index;
+        self.content.reset();
 
-        while let Some(c) = self.content.get(j) {
-            let c = *c as char;
-
+        while self.content.char() != None {
             state = match state {
-                ParsingState::Initial => match c {
-                    ' ' | '\n' => {
-                        self.index += 1;
-                        state
-                    }
-                    '/' => ParsingState::HasMetSlash,
-                    '0'..='9' => ParsingState::ConsumingNumbers,
-                    'a'..='z' | 'A'..='Z' | '_' => ParsingState::ConsumingChars,
-                    '(' | ')' | '[' | ']' | '{' | '}' | ',' | ';' | '=' | '.' | '+' | '-' | '*'
-                    | '&' | '|' | '~' | '<' | '>' => {
-                        let token = self.parse_symbol(self.index);
-                        self.index += 1;
-                        return Some(token);
-                    }
-                    '"' => {
-                        self.index += 1;
-                        ParsingState::HasMetQuote
-                    }
-                    _ => {
-                        self.index += 1;
-                        state
-                    }
-                },
-                ParsingState::ConsumingChars => match c {
-                    'a'..='z' | 'A'..='Z' | '0'..='9' | '_' => state,
-                    _ => {
-                        let token = self.parse_chars(self.index, j);
-                        self.index = j;
-                        return Some(token);
-                    }
-                },
-                ParsingState::ConsumingNumbers => match c {
-                    '0'..='9' => state,
-                    _ => {
-                        let token = self.parse_integer_constant(self.index, j);
-                        self.index = j;
-                        return Some(token);
-                    }
-                },
-                ParsingState::HasMetQuote => match c {
-                    '"' => {
-                        let token = self.parse_string_content(self.index, j);
-                        self.index = j + 1;
-                        return Some(token);
-                    }
-                    _ => state,
-                },
-                ParsingState::HasMetSlash => match c {
-                    '/' => ParsingState::OneLineComment,
-                    '*' => ParsingState::BlockComment,
-                    _ => {
-                        let token = self.parse_symbol(self.index);
-                        self.index = j + 1;
-                        return Some(token);
-                    }
-                },
-                ParsingState::OneLineComment => match c {
-                    '\n' => {
-                        self.index = j + 1;
-                        ParsingState::Initial
-                    }
-                    _ => state,
-                },
-                ParsingState::BlockComment => match c {
-                    '*' => ParsingState::BlockCommentCanEnd,
-                    _ => state,
-                },
-                ParsingState::BlockCommentCanEnd => match c {
-                    '/' => {
-                        self.index = j + 1;
-                        ParsingState::Initial
-                    }
-                    _ => state,
-                },
+                ParsingState::Initial => self.handle_initial(state),
+                ParsingState::ConsumingChars => self.handle_consuming_chars(state),
+                ParsingState::ConsumingNumbers => self.handle_consuming_numbers(state),
+                ParsingState::HasMetQuote => self.handle_has_met_quote(state),
+                ParsingState::HasMetSlash => self.handle_has_met_slash(),
+                ParsingState::OneLineComment => self.handle_one_line_comment(state),
+                ParsingState::BlockComment => self.handle_block_comment(state),
+                ParsingState::BlockCommentCanEnd => self.handle_block_comment_can_end(state),
+                _ => panic!("Unhandled state!"),
             };
 
-            j += 1;
+            if let ParsingState::End(token) = state {
+                return Some(token);
+            }
+
+            self.content.advance_current();
         }
 
         None
