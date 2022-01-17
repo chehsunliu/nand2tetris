@@ -40,11 +40,7 @@ impl Content {
         self.content.get(self.current_index).map(|u| *u as char)
     }
 
-    fn advance_base(&mut self) {
-        self.base_index += 1;
-    }
-
-    fn advance_current(&mut self) {
+    fn advance(&mut self) {
         self.current_index += 1;
     }
 
@@ -92,7 +88,7 @@ impl Tokenizer {
     fn handle_initial(&mut self, state: ParsingState) -> ParsingState {
         match self.content.char().unwrap() {
             ' ' | '\n' => {
-                self.content.advance_base();
+                self.content.cut_char();
                 state
             }
             '/' => ParsingState::HasMetSlash,
@@ -104,11 +100,11 @@ impl Tokenizer {
                 return ParsingState::End(token);
             }
             '"' => {
-                self.content.advance_base();
+                self.content.cut_char();
                 ParsingState::HasMetQuote
             }
             _ => {
-                self.content.advance_base();
+                self.content.cut_char();
                 state
             }
         }
@@ -147,8 +143,8 @@ impl Tokenizer {
         match self.content.char().unwrap() {
             '"' => {
                 let s = self.content.cut_word();
+                self.content.cut_char();
                 let token = Token::StringConstant(s.to_string());
-                self.content.advance_base();
                 return ParsingState::End(token);
             }
             _ => state,
@@ -170,7 +166,7 @@ impl Tokenizer {
         match self.content.char().unwrap() {
             '\n' => {
                 self.content.cut_word();
-                self.content.advance_base();
+                self.content.cut_char();
                 ParsingState::Initial
             }
             _ => state,
@@ -188,7 +184,7 @@ impl Tokenizer {
         match self.content.char().unwrap() {
             '/' => {
                 self.content.cut_word();
-                self.content.advance_base();
+                self.content.cut_char();
                 ParsingState::Initial
             }
             '*' => state,
@@ -221,7 +217,7 @@ impl Iterator for Tokenizer {
                 return Some(token);
             }
 
-            self.content.advance_current();
+            self.content.advance();
         }
 
         None
