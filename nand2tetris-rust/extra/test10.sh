@@ -12,8 +12,8 @@ PATH="$build_dir:$tool_dir:$PATH"
 
 project_dir="$script_dir/../../projects/10"
 folders=(
-  ArrayTest
   ExpressionLessSquare
+  ArrayTest
   Square
 )
 

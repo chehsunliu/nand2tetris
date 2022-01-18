@@ -17,6 +17,6 @@ if __name__ == "__main__":
             "./nand2tetris-rust",
             "jack-analyzer",
             "--input-path", input_path,
-            "--output-path", output_path,
+            "--output-directory", output_path,
         ]
     )

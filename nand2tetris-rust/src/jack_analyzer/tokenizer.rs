@@ -1,24 +1,12 @@
 use std::error::Error;
-use std::fmt::{Display, Formatter};
 
+#[derive(Debug, Clone)]
 pub enum Token {
     Keyword(String),
     Symbol(char),
     Identifier(String),
     IntegerConstant(i32),
     StringConstant(String),
-}
-
-impl Display for Token {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Token::Keyword(s) => write!(f, "<keyword> {} </keyword>", s),
-            Token::Symbol(c) => write!(f, "<symbol> {} </symbol>", c),
-            Token::Identifier(s) => write!(f, "<identifier> {} </identifier>", s),
-            Token::IntegerConstant(i) => write!(f, "<integerConstant> {} </integerConstant>", i),
-            Token::StringConstant(s) => write!(f, "<stringConstant> {} </stringConstant>", s),
-        }
-    }
 }
 
 struct Content {
