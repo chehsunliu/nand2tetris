@@ -45,10 +45,7 @@ impl Analyzer {
             token => panic!("Expected class name but got {:?}", token),
         };
 
-        match self.tokenizer.forward() {
-            Token::Symbol(c) if c == '{' => self.write_symbol(c),
-            token => panic!("Expected left brace but got {:?}", token),
-        }
+        self.compile_left_brace();
 
         loop {
             let token = self.tokenizer.forward();
@@ -72,10 +69,7 @@ impl Analyzer {
             }
         }
 
-        match self.tokenizer.forward() {
-            Token::Symbol(c) if c == '}' => self.write_symbol(c),
-            token => panic!("Expected right brace but got {:?}", token),
-        }
+        self.compile_right_brace();
 
         self.write_end();
     }
@@ -103,17 +97,9 @@ impl Analyzer {
             t => panic!("Expected function name but got {:?}", t),
         }
 
-        match self.tokenizer.forward() {
-            Token::Symbol(c) if c == '(' => self.write_symbol(c),
-            t => panic!("Expected left parenthesis but got {:?}", t),
-        }
-
+        self.compile_left_parenthesis();
         self.compile_parameter_list();
-
-        match self.tokenizer.forward() {
-            Token::Symbol(c) if c == ')' => self.write_symbol(c),
-            t => panic!("Expected right parenthesis but got {:?}", t),
-        }
+        self.compile_right_parenthesis();
 
         self.compile_subroutine_body();
 
@@ -153,11 +139,7 @@ impl Analyzer {
 
     fn compile_subroutine_body(&mut self) {
         self.write_start("subroutineBody");
-
-        match self.tokenizer.forward() {
-            Token::Symbol(c) if c == '{' => self.write_symbol(c),
-            t => panic!("Expected left brace but got {:?}", t),
-        }
+        self.compile_left_brace();
 
         loop {
             match self.tokenizer.forward() {
@@ -174,11 +156,7 @@ impl Analyzer {
 
         self.compile_statements();
 
-        match self.tokenizer.forward() {
-            Token::Symbol(c) if c == '}' => self.write_symbol(c),
-            t => panic!("Expected right brace but got {:?}", t),
-        }
-
+        self.compile_right_brace();
         self.write_end();
     }
 
@@ -231,28 +209,24 @@ impl Analyzer {
         self.write_start("ifStatement");
         self.write_keyword("if");
 
-        match self.tokenizer.forward() {
-            Token::Symbol('(') => self.write_symbol('('),
-            t => panic!("Expected left parenthesis but got {:?}", t),
-        }
-
+        self.compile_left_parenthesis();
         self.compile_expression();
+        self.compile_right_parenthesis();
 
-        match self.tokenizer.forward() {
-            Token::Symbol(')') => self.write_symbol(')'),
-            t => panic!("Expected right parenthesis but got {:?}", t),
-        }
-
-        match self.tokenizer.forward() {
-            Token::Symbol('{') => self.write_symbol('{'),
-            t => panic!("Expected left brace but got {:?}", t),
-        }
-
+        self.compile_left_brace();
         self.compile_statements();
+        self.compile_right_brace();
 
         match self.tokenizer.forward() {
-            Token::Symbol('}') => self.write_symbol('}'),
-            t => panic!("Expected right brace but got {:?}", t),
+            Token::Keyword(keyword) if keyword == "else" => {
+                self.write_keyword(&keyword);
+                self.compile_left_brace();
+                self.compile_statements();
+                self.compile_right_brace();
+            }
+            _ => {
+                self.tokenizer.backward();
+            }
         }
 
         self.write_end();
@@ -262,7 +236,13 @@ impl Analyzer {
         self.write_start("whileStatement");
         self.write_keyword("while");
 
-        // TODO
+        self.compile_left_parenthesis();
+        self.compile_expression();
+        self.compile_right_parenthesis();
+
+        self.compile_left_brace();
+        self.compile_statements();
+        self.compile_right_brace();
 
         self.write_end();
     }
@@ -381,17 +361,9 @@ impl Analyzer {
             }
         }
 
-        match self.tokenizer.forward() {
-            Token::Symbol('(') => self.write_symbol('('),
-            t => panic!("Expected left parenthesis but got {:?}", t),
-        }
-
+        self.compile_left_parenthesis();
         self.compile_expression_list();
-
-        match self.tokenizer.forward() {
-            Token::Symbol(')') => self.write_symbol(')'),
-            t => panic!("Expected right parenthesis but got {:?}", t),
-        }
+        self.compile_right_parenthesis();
     }
 
     fn compile_variable_declaration(&mut self, declaration: &str) {
@@ -444,6 +416,34 @@ impl Analyzer {
         match self.tokenizer.forward() {
             Token::Symbol(';') => self.write_symbol(';'),
             t => panic!("Expected semi-colon but got {:?}", t),
+        }
+    }
+
+    fn compile_left_brace(&mut self) {
+        match self.tokenizer.forward() {
+            Token::Symbol(c) if c == '{' => self.write_symbol(c),
+            token => panic!("Expected left brace but got {:?}", token),
+        }
+    }
+
+    fn compile_right_brace(&mut self) {
+        match self.tokenizer.forward() {
+            Token::Symbol(c) if c == '}' => self.write_symbol(c),
+            token => panic!("Expected right brace but got {:?}", token),
+        }
+    }
+
+    fn compile_left_parenthesis(&mut self) {
+        match self.tokenizer.forward() {
+            Token::Symbol('(') => self.write_symbol('('),
+            t => panic!("Expected left parenthesis but got {:?}", t),
+        }
+    }
+
+    fn compile_right_parenthesis(&mut self) {
+        match self.tokenizer.forward() {
+            Token::Symbol(')') => self.write_symbol(')'),
+            t => panic!("Expected right parenthesis but got {:?}", t),
         }
     }
 }
