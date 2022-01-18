@@ -13,10 +13,9 @@ if __name__ == "__main__":
         output_path = os.path.dirname(input_path)
 
     subprocess.call(
-        [
-            "./nand2tetris-rust",
-            "jack-analyzer",
-            "--input-path", input_path,
-            "--output-directory", output_path,
-        ]
+        ["./nand2tetris-rust", "jack-analyzer", "--input-path", input_path, "--output-directory", output_path]
+    )
+
+    subprocess.call(
+        ["sed", "-i", r"s/ > / \&gt; /g", f"{output_path}/Square.xml"]
     )
