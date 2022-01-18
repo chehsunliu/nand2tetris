@@ -289,14 +289,74 @@ impl Analyzer {
     fn compile_expression(&mut self) {
         self.write_start("expression");
 
-        // TODO
-        self.write_start("term");
-        match self.tokenizer.forward() {
-            Token::Identifier(s) => self.write_identifier(&s),
-            Token::Keyword(s) => self.write_keyword(&s),
-            t => panic!("Expected expression identifier or keyword but got {:?}", t),
+        self.compile_term();
+
+        loop {
+            match self.tokenizer.forward() {
+                Token::Symbol(c)
+                    if c == '+'
+                        || c == '-'
+                        || c == '*'
+                        || c == '/'
+                        || c == '&'
+                        || c == '|'
+                        || c == '<'
+                        || c == '>'
+                        || c == '=' => {
+                    self.write_symbol(c);
+                    self.compile_term();
+                }
+                _ => {
+                    self.tokenizer.backward();
+                    break;
+                }
+            }
         }
+
         self.write_end();
+    }
+
+    fn compile_term(&mut self) {
+        self.write_start("term");
+
+        match self.tokenizer.forward() {
+            Token::IntegerConstant(v) => self.write_integer_constant(v),
+            Token::StringConstant(v) => self.write_string_constant(&v),
+            Token::Keyword(v) if v == "true" || v == "false" || v == "null" || v == "this" => {
+                self.write_keyword(&v)
+            }
+            Token::Symbol(v) if v == '(' => {
+                self.tokenizer.backward();
+                self.compile_left_parenthesis();
+                self.compile_expression();
+                self.compile_right_parenthesis();
+            }
+            Token::Symbol(v) if v == '-' || v == '~' => {
+                self.write_symbol(v);
+                self.compile_term();
+            }
+            Token::Identifier(token0) => {
+                let token1 = self.tokenizer.forward();
+
+                match token1 {
+                    Token::Symbol(c) if c == '(' || c == '.' => {
+                        self.tokenizer.backward();
+                        self.tokenizer.backward();
+                        self.compile_subroutine_call();
+                    }
+                    Token::Symbol('[') => {
+                        self.write_identifier(&token0);
+                        self.tokenizer.backward();
+                        self.compile_bracket_expression();
+                    }
+                    _ => {
+                        self.write_identifier(&token0);
+                        self.tokenizer.backward();
+                    }
+                }
+            }
+            token => panic!("Unexpected term {:?}", token),
+        }
 
         self.write_end();
     }
@@ -319,7 +379,7 @@ impl Analyzer {
                 Token::Symbol(')') => {
                     self.tokenizer.backward();
                     break;
-                },
+                }
                 Token::Symbol(',') => self.write_symbol(','),
                 t => panic!("Expected right parenthesis or comma but got {:?}", t),
             }
@@ -476,6 +536,18 @@ impl Analyzer {
     fn write_identifier(&mut self, identifier: &str) {
         self.write_start("identifier");
         self.write_characters(&format!(" {} ", identifier));
+        self.write_end();
+    }
+
+    fn write_integer_constant(&mut self, value: i32) {
+        self.write_start("integerConstant");
+        self.write_characters(&format!(" {} ", value));
+        self.write_end();
+    }
+
+    fn write_string_constant(&mut self, value: &str) {
+        self.write_start("stringConstant");
+        self.write_characters(&format!(" {} ", value));
         self.write_end();
     }
 }
